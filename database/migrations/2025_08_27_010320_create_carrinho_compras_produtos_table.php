@@ -8,6 +8,7 @@ return new class extends Migration {
         Schema::create('carrinho_compras_produtos', function (Blueprint $table) {
             $table->foreignId('id_carrinho_compras')->constrained('carrinho_compras', 'id_carrinho_compras')->onDelete('cascade');
             $table->foreignId('id_produto')->constrained('produtos', 'id_produto');
+            $table->integer('quantidade')->default(1);
             $table->primary(['id_carrinho_compras', 'id_produto']); // Chave primária composta
         });
     }
