@@ -40,6 +40,13 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+
+        // ADICIONE ESTAS LINHAS
+        'api' => [
+            'driver' => 'sanctum',
+            'provider' => 'users',
+        ],
+
     ],
 
     /*
