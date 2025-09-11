@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\ProdutoResource;
 use Illuminate\Http\Request;
 use App\Models\Produto;
 
@@ -18,7 +19,7 @@ class ProdutoController extends Controller
         // Isso evita o problema de "N+1 queries" e torna a API mais eficiente.
         $produtos = Produto::with(['categoria', 'imagens'])->paginate(10); // Paginar com 10 itens por página
 
-        return response()->json($produtos);
+        return ProdutoResource::collection($produtos);
     }
 
     /**
@@ -71,7 +72,7 @@ class ProdutoController extends Controller
         }
 
         // Se encontrarmos, retornamos o produto como JSON
-        return response()->json($produto);
+        return new ProdutoResource($produto);
     }
 
     /**
