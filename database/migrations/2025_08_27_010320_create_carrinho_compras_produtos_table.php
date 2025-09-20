@@ -6,10 +6,12 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void {
         Schema::create('carrinho_compras_produtos', function (Blueprint $table) {
+            $table->id(); // <-- ADICIONADO: Cria uma PK auto-incremental 'id'
             $table->foreignId('id_carrinho_compras')->constrained('carrinho_compras', 'id_carrinho_compras')->onDelete('cascade');
             $table->foreignId('id_produto')->constrained('produtos', 'id_produto');
             $table->integer('quantidade')->default(1);
-            $table->primary(['id_carrinho_compras', 'id_produto']); // Chave primária composta
+            // A linha abaixo foi removida, pois $table->id() já é a chave primária
+            // $table->primary(['id_carrinho_compras', 'id_produto']);
         });
     }
     public function down(): void {

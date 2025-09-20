@@ -237,3 +237,122 @@ Requer o token de um usuário **administrador**.
 
 #### Resposta de Sucesso (Status 204)
 A resposta não contém corpo (`No Content`), indicando que a deleção foi bem-sucedida.
+
+---
+
+## Endpoints de Carrinho de Compras
+
+Endpoints para gerenciar o carrinho de compras de um usuário logado. Todas as rotas deste grupo exigem autenticação via Bearer Token.
+
+### 9. Ver Carrinho de Compras
+
+Retorna o carrinho de compras e todos os produtos contidos nele para o usuário autenticado.
+
+* **Método:** `GET`
+* **Endpoint:** `/carrinho`
+* **URL Completa:** `http://127.0.0.1:8000/api/carrinho`
+
+#### Autenticação (Header)
+É necessário enviar um Header de `Authorization` com o token do usuário.
+* **Key:** `Authorization`
+* **Value:** `Bearer SEU_TOKEN_DE_USUARIO_AQUI`
+
+#### Resposta de Sucesso (Status 200)
+```json
+{
+    "id_carrinho_compras": 1,
+    "id_user": 1,
+    "created_at": "...",
+    "updated_at": "...",
+    "produtos": [
+        {
+            "id_produto": 1,
+            "nome": "Capacete Pro Tork R8",
+            "preco": "350.99",
+            // ...demais dados do produto
+            "pivot": {
+                "id_carrinho_compras": 1,
+                "id_produto": 1,
+                "quantidade": 2
+            }
+        }
+    ]
+}
+```
+
+---
+
+### 10. Adicionar Produto ao Carrinho
+
+Adiciona um produto específico ao carrinho do usuário. Se o produto já existir no carrinho, a quantidade é somada.
+
+* **Método:** `POST`
+* **Endpoint:** `/carrinho/produtos`
+* **URL Completa:** `http://127.0.0.1:8000/api/carrinho/produtos`
+
+#### Autenticação (Header)
+Requer o token de um usuário.
+* **Key:** `Authorization`
+* **Value:** `Bearer SEU_TOKEN_DE_USUARIO_AQUI`
+
+#### Corpo da Requisição (Body - JSON)
+```json
+{
+    "id_produto": 2,
+    "quantidade": 1
+}
+```
+
+#### Resposta de Sucesso (Status 200)
+Retorna o estado atualizado do carrinho de compras.
+```json
+{
+    "message": "Produto adicionado ao carrinho com sucesso!",
+    "carrinho": {
+        // ...objeto completo do carrinho atualizado...
+    }
+}
+```
+
+---
+
+### 11. Atualizar Quantidade de um Produto no Carrinho
+
+Altera a quantidade de um produto que já está no carrinho.
+
+* **Método:** `PUT`
+* **Endpoint:** `/carrinho/produtos/{id_produto}`
+* **URL Completa:** `http://127.0.0.1:8000/api/carrinho/produtos/2`
+
+#### Autenticação (Header)
+Requer o token de um usuário.
+* **Key:** `Authorization`
+* **Value:** `Bearer SEU_TOKEN_DE_USUARIO_AQUI`
+
+#### Corpo da Requisição (Body - JSON)
+```json
+{
+    "quantidade": 5
+}
+```
+
+#### Resposta de Sucesso (Status 200)
+Retorna o JSON completo do carrinho com a quantidade do produto atualizada.
+
+---
+
+### 12. Remover Produto do Carrinho
+
+Remove um item específico do carrinho de compras do usuário.
+
+* **Método:** `DELETE`
+* **Endpoint:** `/carrinho/produtos/{id_produto}`
+* **URL Completa:** `http://127.0.0.1:8000/api/carrinho/produtos/2`
+
+#### Autenticação (Header)
+Requer o token de um usuário.
+* **Key:** `Authorization`
+* **Value:** `Bearer SEU_TOKEN_DE_USUARIO_AQUI`
+
+#### Resposta de Sucesso (Status 200)
+Retorna o JSON completo do carrinho, agora sem o produto que foi removido.

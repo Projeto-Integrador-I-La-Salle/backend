@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController; 
 use App\Http\Controllers\Api\ProdutoController;
+use App\Http\Controllers\Api\CarrinhoController; 
 
 // Rotas de Autenticação
 Route::post('/auth/register', [AuthController::class, 'register']);
@@ -20,13 +21,15 @@ Route::middleware('auth:sanctum')->group(function () {
         return $request->user();
     });
 
-    // Rota para criar um novo produto (será protegida para admin dentro do controller)
+     // --- Produtos (Administração) ---
     Route::post('/produtos', [ProdutoController::class, 'store']);
-
-    // Rota para atualizar um produto existente
     Route::put('/produtos/{uuid}', [ProdutoController::class, 'update']);
-
-    // Rota para deletar um produto
     Route::delete('/produtos/{uuid}', [ProdutoController::class, 'destroy']);
+
+    // --- Carrinho de Compras ---
+    Route::get('/carrinho', [CarrinhoController::class, 'show']);
+    Route::post('/carrinho/produtos', [CarrinhoController::class, 'add']);
+    Route::put('/carrinho/produtos/{id_produto}', [CarrinhoController::class, 'update']);
+    Route::delete('/carrinho/produtos/{id_produto}', [CarrinhoController::class, 'remove']);
     
 });
