@@ -12,12 +12,13 @@ class ProdutoController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         // Usamos o Model Produto para buscar todos os produtos do banco.
         // O método 'with' é usado para carregar os relacionamentos (neste caso, a categoria e as imagens de cada produto).
         // Isso evita o problema de "N+1 queries" e torna a API mais eficiente.
-        $produtos = Produto::with(['categoria', 'imagens'])->paginate(10); // Paginar com 10 itens por página
+        $perPage = $request->input('per_page', 10);
+        $produtos = Produto::with(['categoria', 'imagens'])->paginate($perPage); // Paginar com 10 itens por página
 
         return ProdutoResource::collection($produtos);
     }
