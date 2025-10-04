@@ -22,6 +22,10 @@ class Produto extends Model
         'descricao',
         'preco',
         'qtd_estoque',
+        'codigo',
+        'qtd_minima',
+        'valor_custo',
+        'valor_venda'
     ];
 
     // RELACIONAMENTOS ENTRE AS TABELAS
@@ -43,5 +47,10 @@ class Produto extends Model
     public function categoriasEspeciais(): BelongsToMany
     {
         return $this->belongsToMany(CategoriaEspecial::class, 'categorias_especiais_produtos', 'id_produto', 'id_categorias_especiais');
+    }
+
+    public function setQtdMinimaAttribute($value)
+    {
+        $this->attributes['qtd_minima'] = $value ?: 0;
     }
 }
