@@ -4,8 +4,14 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ProdutoResource;
+use App\Imports\ProdutosImport;
 use Illuminate\Http\Request;
 use App\Models\Produto;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rules\File;
+use Illuminate\Validation\ValidationException;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ProdutoController extends Controller
 {
@@ -135,5 +141,46 @@ class ProdutoController extends Controller
         // 4. Retorno da Resposta
         // Uma resposta de sucesso para delete não precisa de corpo, apenas o status 204.
         return response()->json(null, 204); // 204 No Content
+    }
+
+    public function import(Request $request)
+    {
+        try {
+            $request->validate([
+                'produtos' => [
+                    'required',
+                    File::types(['xlsx'])
+                        ->min('1kb')
+                        ->max('1mb')
+                ]
+            ]);
+
+            Excel::import(
+                new ProdutosImport,
+                $request->file('produtos')
+            );
+
+            return response()->json(
+                ['message' => 'Upload concluído com sucesso'],
+                200
+            );
+        } catch (ValidationException $e) {
+            $errors = $e->errors();
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Erro de validação',
+                'errors' => $errors,
+            ], 422);
+        } catch (\Throwable $e) {
+            Log::error("[ERROR]: Não foi possível importar .xlsx ", [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return response()->json([
+                'message' => 'Ocorreu um erro ao importar planilha de produtos.'
+            ], 500);
+        }
     }
 }
