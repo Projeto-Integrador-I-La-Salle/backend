@@ -27,6 +27,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/produtos/{uuid}', [ProdutoController::class, 'update']);
     Route::delete('/produtos/{uuid}', [ProdutoController::class, 'destroy']);
     Route::post('/produtos/importar-estoque', [ProdutoController::class, 'import']);
+    Route::post('/produtos/{uuid}/imagens', [ProdutoController::class, 'addImage']);
 
     // --- Carrinho de Compras ---
     Route::get('/carrinho', [CarrinhoController::class, 'show']);

@@ -8,7 +8,6 @@ use App\Imports\ProdutosImport;
 use Illuminate\Http\Request;
 use App\Models\Produto;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\File;
 use Illuminate\Validation\ValidationException;
 use Maatwebsite\Excel\Facades\Excel;
@@ -180,6 +179,57 @@ class ProdutoController extends Controller
 
             return response()->json([
                 'message' => 'Ocorreu um erro ao importar planilha de produtos.'
+            ], 500);
+        }
+    }
+
+    public function addImage(Request $request, string $uuid)
+    {
+        try {
+            if ($request->user()->permissao !== 'admin') {
+                return response()->json([
+                    'message' => 'Acesso negado. Apenas administradores podem deletar produtos.'
+                ], 403);
+            }
+
+            $validated = $request->validate([
+                'imagens' => ['required', 'array', 'min:1'],
+                'imagens.*' => ['required', 'string', 'max:255']
+            ]);
+
+            $produto = Produto::where('id_publico', $uuid)->first();
+
+            if (!$produto) {
+                return response()->json([
+                    'message' => 'Produto não encontrado'
+                ], 404);
+            }
+
+            foreach ($validated['imagens'] as $imagem) {
+                $url = $imagem->store('produtos');
+
+                $produto->imagens->create([
+                    'url' => $url
+                ]);
+            }
+
+            return response()->json($produto->load('imagem'));
+        } catch (ValidationException $e) {
+            $errors = $e->errors();
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Erro de validação',
+                'errors' => $errors,
+            ], 422);
+        } catch (\Throwable $e) {
+            Log::error("[ProdutoController.addImage] =>", [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return response()->json([
+                'message' => 'Ocorreu um erro ao salvar as imagens.'
             ], 500);
         }
     }
