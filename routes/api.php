@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ProdutoController;
 use App\Http\Controllers\Api\CarrinhoController;
+use App\Http\Controllers\Api\ListaDesejosController;
 
 // Rotas de Autenticação
 Route::post('/auth/register', [AuthController::class, 'register']);
@@ -34,4 +35,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/carrinho/produtos', [CarrinhoController::class, 'add']);
     Route::put('/carrinho/produtos/{id_produto}', [CarrinhoController::class, 'update']);
     Route::delete('/carrinho/produtos/{id_produto}', [CarrinhoController::class, 'remove']);
+
+    // --- Lista de Desejos ---
+    Route::get('/lista-desejos', [ListaDesejosController::class, 'show']);
+    Route::post('/lista-desejos/produtos', [ListaDesejosController::class, 'add']);
+    Route::delete('/lista-desejos/produtos/{id_produto}', [ListaDesejosController::class, 'remove']);
+
 });
