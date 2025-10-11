@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ProdutoController;
 use App\Http\Controllers\Api\CarrinhoController;
 use App\Http\Controllers\Api\ListaDesejosController;
+use App\Http\Controllers\Api\DescontoController;
 
 // Rotas de Autenticação
 Route::post('/auth/register', [AuthController::class, 'register']);
@@ -40,5 +41,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/lista-desejos', [ListaDesejosController::class, 'show']);
     Route::post('/lista-desejos/produtos', [ListaDesejosController::class, 'add']);
     Route::delete('/lista-desejos/produtos/{id_produto}', [ListaDesejosController::class, 'remove']);
+
+    // --- DESCONTOS (Admin) ---
+    Route::apiResource('descontos', DescontoController::class);
 
 });

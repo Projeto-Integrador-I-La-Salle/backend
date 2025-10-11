@@ -356,3 +356,96 @@ Requer o token de um usuário.
 
 #### Resposta de Sucesso (Status 200)
 Retorna o JSON completo do carrinho, agora sem o produto que foi removido.
+
+---
+
+## Endpoints de Lista de Desejos
+
+Endpoints para gerenciar a lista de desejos de um usuário logado. Todas as rotas deste grupo exigem autenticação via Bearer Token.
+
+### 13. Ver Lista de Desejos
+
+Retorna a lista de desejos e todos os produtos contidos nela para o usuário autenticado.
+
+* **Método:** `GET`
+* **Endpoint:** `/lista-desejos`
+* **URL Completa:** `http://127.0.0.1:8000/api/lista-desejos`
+
+#### Autenticação (Header)
+É necessário enviar um Header de `Authorization` com o token do usuário.
+* **Key:** `Authorization`
+* **Value:** `Bearer SEU_TOKEN_DE_USUARIO_AQUI`
+
+#### Resposta de Sucesso (Status 200)
+```json
+{
+    "id_lista_desejos": 1,
+    "id_user": 1,
+    "created_at": "...",
+    "updated_at": "...",
+    "produtos": [
+        {
+            "id_produto": 3,
+            "nome": "Óleo Mobil Super Moto 20W-50",
+            "preco": "35.50",
+            // ...demais dados do produto
+            "pivot": {
+                "id_lista_desejos": 1,
+                "id_produto": 3
+            }
+        }
+    ]
+}
+```
+*Se a lista estiver vazia, a resposta será `{"message": "Sua lista de desejos está vazia."}`.*
+
+---
+
+### 14. Adicionar Produto à Lista de Desejos
+
+Adiciona um produto específico à lista de desejos do usuário. Se o produto já existir, nada acontece (não há duplicação).
+
+* **Método:** `POST`
+* **Endpoint:** `/lista-desejos/produtos`
+* **URL Completa:** `http://127.0.0.1:8000/api/lista-desejos/produtos`
+
+#### Autenticação (Header)
+Requer o token de um usuário.
+* **Key:** `Authorization`
+* **Value:** `Bearer SEU_TOKEN_DE_USUARIO_AQUI`
+
+#### Corpo da Requisição (Body - JSON)
+```json
+{
+    "id_produto": 3
+}
+```
+
+#### Resposta de Sucesso (Status 200)
+Retorna o estado atualizado da lista de desejos.
+```json
+{
+    "message": "Produto adicionado à lista de desejos!",
+    "lista_desejos": {
+        // ...objeto completo da lista de desejos atualizada...
+    }
+}
+```
+
+---
+
+### 15. Remover Produto da Lista de Desejos
+
+Remove um item específico da lista de desejos do usuário.
+
+* **Método:** `DELETE`
+* **Endpoint:** `/lista-desejos/produtos/{id_produto}`
+* **URL Completa:** `http://127.0.0.1:8000/api/lista-desejos/produtos/3`
+
+#### Autenticação (Header)
+Requer o token de um usuário.
+* **Key:** `Authorization`
+* **Value:** `Bearer SEU_TOKEN_DE_USUARIO_AQUI`
+
+#### Resposta de Sucesso (Status 200)
+Retorna o JSON completo da lista de desejos, agora sem o produto que foi removido.
