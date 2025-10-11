@@ -449,3 +449,178 @@ Requer o token de um usuário.
 
 #### Resposta de Sucesso (Status 200)
 Retorna o JSON completo da lista de desejos, agora sem o produto que foi removido.
+---
+
+## Endpoints de Descontos (Admin)
+
+Endpoints para gerenciar os descontos aplicáveis aos produtos. **Todas as rotas deste grupo exigem autenticação de um usuário com permissão de `admin`.**
+
+### 16. Listar Todos os Descontos
+
+Retorna uma lista paginada de todos os descontos cadastrados.
+
+* **Método:** `GET`
+* **Endpoint:** `/descontos`
+* **URL Completa:** `http://127.0.0.1:8000/api/descontos`
+
+#### Autenticação (Header)
+É necessário enviar um Header de `Authorization` com o **token de um usuário administrador**.
+* **Key:** `Authorization`
+* **Value:** `Bearer SEU_TOKEN_DE_ADMIN_AQUI`
+
+#### Resposta de Sucesso (Status 200)
+```json
+{
+    "current_page": 1,
+    "data": [
+        {
+            "id_descontos": 1,
+            "nome": "Promoção de Fim de Semana",
+            "data_inicio": "2025-10-17T00:00:00.000000Z",
+            "data_fim": "2025-10-19T23:59:59.000000Z",
+            "porcentagem": "15.50",
+            "created_at": "...",
+            "updated_at": "..."
+        }
+    ],
+    // ...outras informações de paginação...
+}
+```
+
+---
+
+### 17. Criar um Novo Desconto
+
+Cria um novo desconto no sistema.
+
+* **Método:** `POST`
+* **Endpoint:** `/descontos`
+* **URL Completa:** `http://127.0.0.1:8000/api/descontos`
+
+#### Autenticação (Header)
+Requer o token de um usuário **administrador**.
+
+#### Corpo da Requisição (Body - JSON)
+```json
+{
+    "nome": "Queima de Estoque - Capacetes",
+    "porcentagem": 25.00,
+    "data_inicio": "2025-11-01 00:00:00",
+    "data_fim": "2025-11-15 23:59:59"
+}
+```
+
+#### Resposta de Sucesso (Status 201)
+Retorna o objeto completo do desconto que acabou de ser criado.
+```json
+{
+    "id_descontos": 2,
+    "nome": "Queima de Estoque - Capacetes",
+    "porcentagem": "25.00",
+    // ...demais dados do desconto...
+}
+```
+
+---
+
+### 18. Buscar um Desconto Específico
+
+Retorna os detalhes de um único desconto pelo seu ID.
+
+* **Método:** `GET`
+* **Endpoint:** `/descontos/{id}`
+* **URL Completa:** `http://127.0.0.1:8000/api/descontos/1`
+
+#### Autenticação (Header)
+Requer o token de um usuário **administrador**.
+
+#### Resposta de Sucesso (Status 200)
+Retorna o JSON completo do desconto solicitado.
+
+---
+
+### 19. Atualizar um Desconto
+
+Atualiza as informações de um desconto existente. Você só precisa enviar os campos que deseja alterar.
+
+* **Método:** `PUT` ou `PATCH`
+* **Endpoint:** `/descontos/{id}`
+* **URL Completa:** `http://127.0.0.1:8000/api/descontos/1`
+
+#### Autenticação (Header)
+Requer o token de um usuário **administrador**.
+
+#### Corpo da Requisição (Body - JSON)
+```json
+{
+    "porcentagem": 30.00
+}
+```
+
+#### Resposta de Sucesso (Status 200)
+Retorna o JSON completo do desconto com as informações atualizadas.
+
+---
+
+### 20. Deletar um Desconto
+
+Remove um desconto do sistema.
+
+* **Método:** `DELETE`
+* **Endpoint:** `/descontos/{id}`
+* **URL Completa:** `http://127.0.0.1:8000/api/descontos/1`
+
+#### Autenticação (Header)
+Requer o token de um usuário **administrador**.
+
+#### Resposta de Sucesso (Status 204)
+A resposta não contém corpo (`No Content`), indicando que a deleção foi bem-sucedida.
+---
+
+## Endpoints de Categorias Especiais (Admin)
+
+Endpoints para gerenciar categorias promocionais, como "Ofertas do Dia". **Todas as rotas deste grupo exigem autenticação de um usuário com permissão de `admin`.**
+
+### 21. Listar Todas as Categorias Especiais
+
+Retorna uma lista paginada de todas as categorias especiais cadastradas.
+
+* **Método:** `GET`
+* **Endpoint:** `/categorias-especiais`
+* **URL Completa:** `http://127.0.0.1:8000/api/categorias-especiais`
+
+#### Autenticação (Header)
+É necessário enviar um Header de `Authorization` com o **token de um usuário administrador**.
+* **Key:** `Authorization`
+* **Value:** `Bearer SEU_TOKEN_DE_ADMIN_AQUI`
+
+#### Resposta de Sucesso (Status 200)
+```json
+{
+    "current_page": 1,
+    "data": [
+        {
+            "id_categorias_especiais": 1,
+            "nome": "Ofertas de Outubro",
+            "data_inicio": "2025-10-15T00:00:00.000000Z",
+            "data_fim": "2025-10-31T23:59:59.000000Z",
+            "porcentagem": "12.00",
+            "created_at": "...",
+            "updated_at": "..."
+        }
+    ],
+    // ...outras informações de paginação...
+}
+```
+
+---
+
+### 22. Criar uma Nova Categoria Especial
+
+Cria uma nova categoria especial no sistema.
+
+* **Método:** `POST`
+* **Endpoint:** `/categorias-especiais`
+* **URL Completa:** `http://127.0.0.1:8000/api/categorias-especiais`
+
+#### Autenticação (Header)

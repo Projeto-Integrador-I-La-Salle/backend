@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\ProdutoController;
 use App\Http\Controllers\Api\CarrinhoController;
 use App\Http\Controllers\Api\ListaDesejosController;
 use App\Http\Controllers\Api\DescontoController;
+use App\Http\Controllers\Api\CategoriaEspecialController;
 
 // Rotas de Autenticação
 Route::post('/auth/register', [AuthController::class, 'register']);
@@ -44,5 +45,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // --- DESCONTOS (Admin) ---
     Route::apiResource('descontos', DescontoController::class);
+
+    // --- CATEGORIAS ESPECIAIS (Admin) ---
+    Route::apiResource('categorias-especiais', CategoriaEspecialController::class);
 
 });
