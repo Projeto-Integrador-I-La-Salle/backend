@@ -11,10 +11,12 @@ class ProdutoResource extends JsonResource
     {
         return [
             'id' => $this->id_publico,
+            'codigo' => $this->codigo,
             'nome' => $this->nome,
             'descricao' => $this->descricao,
             'preco' => $this->preco,
             'qtdEstoque' => $this->qtd_estoque,
+            'vlrVenda' => $this->valor_venda,
             'categoria' => new CategoriaResource($this->whenLoaded('categoria')),
             'imagens' => ImagemResource::collection($this->whenLoaded('imagens')),
         ];
