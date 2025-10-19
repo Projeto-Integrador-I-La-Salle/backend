@@ -16,7 +16,7 @@ Route::post('/auth/login', [AuthController::class, 'login']);
 // Rotas de Produtos
 Route::get('/produtos', [ProdutoController::class, 'index']);
 Route::get('/produtos/{uuid}', [ProdutoController::class, 'show'])
-    ->where('uuid', '[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[0-9a-f]{4}-[0-9a-f]{12}');
+    ->whereUuid('uuid');
 
 // Rotas que EXIGEM AUTENTICAÇÃO
 Route::middleware('auth:sanctum')->group(function () {
@@ -27,10 +27,13 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // --- Produtos (Administração) ---
     Route::post('/produtos', [ProdutoController::class, 'store']);
-    Route::put('/produtos/{uuid}', [ProdutoController::class, 'update']);
-    Route::delete('/produtos/{uuid}', [ProdutoController::class, 'destroy']);
+    Route::put('/produtos/{uuid}', [ProdutoController::class, 'update'])
+        ->whereUuid('uuid');
+    Route::delete('/produtos/{uuid}', [ProdutoController::class, 'destroy'])
+        ->whereUuid('uuid');
     Route::post('/produtos/importar-estoque', [ProdutoController::class, 'import']);
-    Route::post('/produtos/{uuid}/imagens', [ProdutoController::class, 'addImage']);
+    Route::post('/produtos/{uuid}/imagens', [ProdutoController::class, 'addImage'])
+        ->whereUuid('uuid');
 
     // --- Carrinho de Compras ---
     Route::get('/carrinho', [CarrinhoController::class, 'show']);
@@ -48,5 +51,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // --- CATEGORIAS ESPECIAIS (Admin) ---
     Route::apiResource('categorias-especiais', CategoriaEspecialController::class);
+
+    // --- ASSOCIAÇÃO DE PRODUTOS (Admin) ---
+    Route::post('/produtos/{uuid}/descontos', [ProdutoController::class, 'attachDesconto']);
+    Route::delete('/produtos/{uuid}/descontos/{id_desconto}', [ProdutoController::class, 'detachDesconto']);
 
 });

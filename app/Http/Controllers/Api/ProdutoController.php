@@ -23,7 +23,7 @@ class ProdutoController extends Controller
         // O método 'with' é usado para carregar os relacionamentos (neste caso, a categoria e as imagens de cada produto).
         // Isso evita o problema de "N+1 queries" e torna a API mais eficiente.
         $perPage = $request->input('per_page', 10);
-        $produtos = Produto::with(['categoria', 'imagens'])->paginate($perPage); // Paginar com 10 itens por página
+        $produtos = Produto::with(['categoria', 'imagens', 'descontos'])->paginate($perPage); // Paginar com 10 itens por página
 
         return ProdutoResource::collection($produtos);
     }
@@ -70,7 +70,7 @@ class ProdutoController extends Controller
         // Usamos o método where() para buscar pelo nosso id_publico (UUID)
         // e o first() para pegar o primeiro (e único) resultado.
         // O with() carrega os relacionamentos, assim como no método index().
-        $produto = Produto::where('id_publico', $uuid)->with(['categoria', 'imagens'])->first();
+        $produto = Produto::where('id_publico', $uuid)->with(['categoria', 'imagens', 'descontos'])->first();
 
         // Se nenhum produto for encontrado com esse UUID, retornamos um erro 404
         if (!$produto) {
@@ -232,5 +232,58 @@ class ProdutoController extends Controller
                 'message' => 'Ocorreu um erro ao salvar as imagens.'
             ], 500);
         }
+    }
+
+    /**
+     * Associa um desconto a um produto. (Admin)
+     */
+    public function attachDesconto(Request $request, string $uuid)
+    {
+        // 1. Verificação de Permissão
+        if ($request->user()->permissao !== 'admin') {
+            return response()->json(['message' => 'Acesso negado'], 403);
+        }
+
+        // 2. Validação: garante que o ID do desconto foi enviado e que ele existe
+        $validatedData = $request->validate([
+            'id_desconto' => 'required|integer|exists:descontos,id_descontos'
+        ]);
+
+        // 3. Encontra o produto pelo UUID
+        $produto = Produto::where('id_publico', $uuid)->first();
+        if (!$produto) {
+            return response()->json(['message' => 'Produto não encontrado'], 404);
+        }
+
+        // 4. Associa o desconto ao produto usando o relacionamento
+        // O método syncWithoutDetaching é ideal: ele adiciona a associação sem criar duplicatas.
+        $produto->descontos()->syncWithoutDetaching([$validatedData['id_desconto']]);
+
+        // 5. Retorna o produto com a lista de descontos atualizada
+        return response()->json($produto->load('descontos'));
+    }
+
+    /**
+     * Desassocia um desconto de um produto. (Admin)
+     */
+    public function detachDesconto(Request $request, string $uuid, string $id_desconto)
+    {
+        // 1. Verificação de Permissão
+        if ($request->user()->permissao !== 'admin') {
+            return response()->json(['message' => 'Acesso negado'], 403);
+        }
+
+        // 2. Encontra o produto pelo UUID
+        $produto = Produto::where('id_publico', $uuid)->first();
+        if (!$produto) {
+            return response()->json(['message' => 'Produto não encontrado'], 404);
+        }
+
+        // 3. Desassocia o desconto do produto
+        // O método detach remove a linha correspondente na tabela de ligação.
+        $produto->descontos()->detach($id_desconto);
+
+        // 4. Retorna o produto com a lista de descontos atualizada
+        return response()->json($produto->load('descontos'));
     }
 }

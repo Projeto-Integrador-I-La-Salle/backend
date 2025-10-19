@@ -19,6 +19,7 @@ class ProdutoResource extends JsonResource
             'vlrVenda' => $this->valor_venda,
             'categoria' => new CategoriaResource($this->whenLoaded('categoria')),
             'imagens' => ImagemResource::collection($this->whenLoaded('imagens')),
+            'descontos' => $this->whenLoaded('descontos'),
         ];
     }
 }
