@@ -53,7 +53,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('categorias-especiais', CategoriaEspecialController::class);
 
     // --- ASSOCIAÇÃO DE PRODUTOS (Admin) ---
+    // Rotas para associar Descontos a Produtos
     Route::post('/produtos/{uuid}/descontos', [ProdutoController::class, 'attachDesconto']);
     Route::delete('/produtos/{uuid}/descontos/{id_desconto}', [ProdutoController::class, 'detachDesconto']);
+    // Rotas para associar Categorias Especiais a Produtos
+    Route::post('/produtos/{uuid}/categorias-especiais', [ProdutoController::class, 'attachCategoriaEspecial']);
+    Route::delete('/produtos/{uuid}/categorias-especiais/{id_categoria_especial}', [ProdutoController::class, 'detachCategoriaEspecial']);
 
 });

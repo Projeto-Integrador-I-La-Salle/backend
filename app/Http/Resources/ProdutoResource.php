@@ -20,6 +20,7 @@ class ProdutoResource extends JsonResource
             'categoria' => new CategoriaResource($this->whenLoaded('categoria')),
             'imagens' => ImagemResource::collection($this->whenLoaded('imagens')),
             'descontos' => $this->whenLoaded('descontos'),
+            'categorias_especiais' => $this->whenLoaded('categoriasEspeciais'),
         ];
     }
 }

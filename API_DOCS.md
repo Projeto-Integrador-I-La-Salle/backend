@@ -686,3 +686,60 @@ Requer o token de um usuário **administrador**.
 
 #### Resposta de Sucesso (Status 200)
 Retorna o JSON completo do produto, agora com a lista de `descontos` atualizada (sem o desconto que foi removido).
+
+### 25. Associar Categoria Especial a um Produto
+
+Associa uma categoria especial existente a um produto específico.
+
+* **Método:** `POST`
+* **Endpoint:** `/produtos/{uuid}/categorias-especiais`
+* **URL Completa:** `http://127.0.0.1:8000/api/produtos/c270a439-19df-3066-a9a0-978a6a54b630/categorias-especiais`
+
+#### Autenticação (Header)
+É necessário enviar um Header de `Authorization` com o **token de um usuário administrador**.
+* **Key:** `Authorization`
+* **Value:** `Bearer SEU_TOKEN_DE_ADMIN_AQUI`
+
+#### Corpo da Requisição (Body - JSON)
+```json
+{
+    "id_categorias_especiais": 1
+}
+```
+
+#### Resposta de Sucesso (Status 200)
+Retorna o objeto completo do produto, agora com a categoria especial incluída na sua lista de `categorias_especiais`.
+```json
+{
+    "id_produto": 1,
+    "id_publico": "c270a439-19df-3066-a9a0-978a6a54b630",
+    "nome": "Capacete Pro Tork R8",
+    // ...demais dados do produto...
+    "categorias_especiais": [
+        {
+            "id_categorias_especiais": 1,
+            "nome": "Ofertas de Outubro",
+            "porcentagem": "12.00",
+            // ...demais dados da categoria...
+        }
+    ]
+}
+```
+
+---
+
+### 26. Desassociar Categoria Especial de um Produto
+
+Remove a associação de uma categoria especial de um produto específico.
+
+* **Método:** `DELETE`
+* **Endpoint:** `/produtos/{uuid}/categorias-especiais/{id_categoria_especial}`
+* **URL Completa:** `http://127.0.0.1:8000/api/produtos/c270a439-19df-3066-a9a0-978a6a54b630/categorias-especiais/1`
+
+#### Autenticação (Header)
+Requer o token de um usuário **administrador**.
+* **Key:** `Authorization`
+* **Value:** `Bearer SEU_TOKEN_DE_ADMIN_AQUI`
+
+#### Resposta de Sucesso (Status 200)
+Retorna o JSON completo do produto, agora com a lista de `categorias_especiais` atualizada (sem a categoria que foi removida).

@@ -23,7 +23,7 @@ class ProdutoController extends Controller
         // O método 'with' é usado para carregar os relacionamentos (neste caso, a categoria e as imagens de cada produto).
         // Isso evita o problema de "N+1 queries" e torna a API mais eficiente.
         $perPage = $request->input('per_page', 10);
-        $produtos = Produto::with(['categoria', 'imagens', 'descontos'])->paginate($perPage); // Paginar com 10 itens por página
+        $produtos = Produto::with(['categoria', 'imagens', 'descontos', 'categoriasEspeciais'])->paginate($perPage); // Paginar com 10 itens por página
 
         return ProdutoResource::collection($produtos);
     }
@@ -70,7 +70,7 @@ class ProdutoController extends Controller
         // Usamos o método where() para buscar pelo nosso id_publico (UUID)
         // e o first() para pegar o primeiro (e único) resultado.
         // O with() carrega os relacionamentos, assim como no método index().
-        $produto = Produto::where('id_publico', $uuid)->with(['categoria', 'imagens', 'descontos'])->first();
+        $produto = Produto::where('id_publico', $uuid)->with(['categoria', 'imagens', 'descontos', 'categoriasEspeciais'])->first();
 
         // Se nenhum produto for encontrado com esse UUID, retornamos um erro 404
         if (!$produto) {
@@ -285,5 +285,56 @@ class ProdutoController extends Controller
 
         // 4. Retorna o produto com a lista de descontos atualizada
         return response()->json($produto->load('descontos'));
+    }
+
+    /**
+     * Associa uma categoria especial a um produto. (Admin)
+     */
+    public function attachCategoriaEspecial(Request $request, string $uuid)
+    {
+        // 1. Verificação de Permissão
+        if ($request->user()->permissao !== 'admin') {
+            return response()->json(['message' => 'Acesso negado'], 403);
+        }
+
+        // 2. Validação
+        $validatedData = $request->validate([
+            'id_categorias_especiais' => 'required|integer|exists:categorias_especiais,id_categorias_especiais'
+        ]);
+
+        // 3. Encontra o produto pelo UUID
+        $produto = Produto::where('id_publico', $uuid)->first();
+        if (!$produto) {
+            return response()->json(['message' => 'Produto não encontrado'], 404);
+        }
+
+        // 4. Associa a categoria especial ao produto
+        $produto->categoriasEspeciais()->syncWithoutDetaching([$validatedData['id_categorias_especiais']]);
+
+        // 5. Retorna o produto com a lista de categorias especiais atualizada
+        return response()->json($produto->load('categoriasEspeciais'));
+    }
+
+    /**
+     * Desassocia uma categoria especial de um produto. (Admin)
+     */
+    public function detachCategoriaEspecial(Request $request, string $uuid, string $id_categoria_especial)
+    {
+        // 1. Verificação de Permissão
+        if ($request->user()->permissao !== 'admin') {
+            return response()->json(['message' => 'Acesso negado'], 403);
+        }
+
+        // 2. Encontra o produto pelo UUID
+        $produto = Produto::where('id_publico', $uuid)->first();
+        if (!$produto) {
+            return response()->json(['message' => 'Produto não encontrado'], 404);
+        }
+
+        // 3. Desassocia a categoria especial do produto
+        $produto->categoriasEspeciais()->detach($id_categoria_especial);
+
+        // 4. Retorna o produto com a lista de categorias especiais atualizada
+        return response()->json($produto->load('categoriasEspeciais'));
     }
 }
