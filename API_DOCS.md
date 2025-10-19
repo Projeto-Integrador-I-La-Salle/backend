@@ -624,3 +624,65 @@ Cria uma nova categoria especial no sistema.
 * **URL Completa:** `http://127.0.0.1:8000/api/categorias-especiais`
 
 #### Autenticação (Header)
+---
+
+## Endpoints de Associação de Produtos (Admin)
+
+Endpoints para vincular/desvincular descontos e categorias especiais a produtos específicos. **Todas as rotas deste grupo exigem autenticação de um usuário com permissão de `admin`.**
+
+### 23. Associar Desconto a um Produto
+
+Associa um desconto existente a um produto específico, fazendo com que o desconto seja aplicável a ele.
+
+* **Método:** `POST`
+* **Endpoint:** `/produtos/{uuid}/descontos`
+* **URL Completa:** `http://127.0.0.1:8000/api/produtos/c270a439-19df-3066-a9a0-978a6a54b630/descontos`
+
+#### Autenticação (Header)
+É necessário enviar um Header de `Authorization` com o **token de um usuário administrador**.
+* **Key:** `Authorization`
+* **Value:** `Bearer SEU_TOKEN_DE_ADMIN_AQUI`
+
+#### Corpo da Requisição (Body - JSON)
+```json
+{
+    "id_desconto": 1
+}
+```
+
+#### Resposta de Sucesso (Status 200)
+Retorna o objeto completo do produto, agora com o desconto incluído na sua lista de `descontos`.
+```json
+{
+    "id_produto": 1,
+    "id_publico": "c270a439-19df-3066-a9a0-978a6a54b630",
+    "nome": "Capacete Pro Tork R8",
+    // ...demais dados do produto...
+    "descontos": [
+        {
+            "id_descontos": 1,
+            "nome": "Promoção de Fim de Semana",
+            "porcentagem": "15.50",
+            // ...demais dados do desconto...
+        }
+    ]
+}
+```
+
+---
+
+### 24. Desassociar Desconto de um Produto
+
+Remove a associação de um desconto de um produto específico.
+
+* **Método:** `DELETE`
+* **Endpoint:** `/produtos/{uuid}/descontos/{id_desconto}`
+* **URL Completa:** `http://127.0.0.1:8000/api/produtos/c270a439-19df-3066-a9a0-978a6a54b630/descontos/1`
+
+#### Autenticação (Header)
+Requer o token de um usuário **administrador**.
+* **Key:** `Authorization`
+* **Value:** `Bearer SEU_TOKEN_DE_ADMIN_AQUI`
+
+#### Resposta de Sucesso (Status 200)
+Retorna o JSON completo do produto, agora com a lista de `descontos` atualizada (sem o desconto que foi removido).
