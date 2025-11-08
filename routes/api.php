@@ -15,8 +15,7 @@ Route::post('/auth/login', [AuthController::class, 'login']);
 
 // Rotas de Produtos
 Route::get('/produtos', [ProdutoController::class, 'index']);
-Route::get('/produtos/{uuid}', [ProdutoController::class, 'show'])
-    ->whereUuid('uuid');
+Route::get('/produtos/{uuid}', [ProdutoController::class, 'show']);
 
 // Rotas que EXIGEM AUTENTICAÇÃO
 Route::middleware('auth:sanctum')->group(function () {
@@ -34,6 +33,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/produtos/importar-estoque', [ProdutoController::class, 'import']);
     Route::post('/produtos/{uuid}/imagens', [ProdutoController::class, 'addImage'])
         ->whereUuid('uuid');
+    Route::post('/produtos/{uuid}/imagens', [ProdutoController::class, 'addImage']);
 
     // --- Carrinho de Compras ---
     Route::get('/carrinho', [CarrinhoController::class, 'show']);
@@ -59,5 +59,4 @@ Route::middleware('auth:sanctum')->group(function () {
     // Rotas para associar Categorias Especiais a Produtos
     Route::post('/produtos/{uuid}/categorias-especiais', [ProdutoController::class, 'attachCategoriaEspecial']);
     Route::delete('/produtos/{uuid}/categorias-especiais/{id_categoria_especial}', [ProdutoController::class, 'detachCategoriaEspecial']);
-
 });

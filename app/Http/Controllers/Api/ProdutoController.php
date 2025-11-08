@@ -186,17 +186,20 @@ class ProdutoController extends Controller
     public function addImage(Request $request, string $uuid)
     {
         try {
+            /*
             if ($request->user()->permissao !== 'admin') {
                 return response()->json([
-                    'message' => 'Acesso negado. Apenas administradores podem deletar produtos.'
+                    'message' => 'Acesso negado. Apenas administradores podem adicionar imagens.'
                 ], 403);
             }
+        */
 
-            $validated = $request->validate([
-                'imagens' => ['required', 'array', 'min:1'],
-                'imagens.*' => ['required', 'string', 'max:255']
+            $request->validate([
+                'image.*' => 'required|image|max:5120', // max 5MB
             ]);
+            Log::info('[INFO]: Validação de input ocorreu com sucesso.');
 
+            Log::info('[INFO]: Iniciando busca do produt.');
             $produto = Produto::where('id_publico', $uuid)->first();
 
             if (!$produto) {
@@ -205,15 +208,26 @@ class ProdutoController extends Controller
                 ], 404);
             }
 
-            foreach ($validated['imagens'] as $imagem) {
-                $url = $imagem->store('produtos');
+            $urls = [];
+            Log::info('[INFO]: Iniciando processamento das imagens.');
+            if ($request->hasFile('images')) {
+                foreach ($request->file('images') as $file) {
+                    $path = $file->store('images', 'public');
+                    Log::info('[INFO]: Path ->' . $path);
 
-                $produto->imagens->create([
-                    'url' => $url
-                ]);
+                    $urls[] = asset("storage/$path");
+                    foreach ($urls as $url) {
+                        Log::info('[INFO]: Url ->' . $url);
+                        $produto->imagens()->create([
+                            'url_imagem' => $url
+                        ]);
+                    }
+                }
             }
 
-            return response()->json($produto->load('imagem'));
+            return response()->json([
+                'urls' => $urls,
+            ]);
         } catch (ValidationException $e) {
             $errors = $e->errors();
 
