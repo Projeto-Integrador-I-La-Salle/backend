@@ -743,3 +743,193 @@ Requer o token de um usuário **administrador**.
 
 #### Resposta de Sucesso (Status 200)
 Retorna o JSON completo do produto, agora com a lista de `categorias_especiais` atualizada (sem a categoria que foi removida).
+
+---
+
+## Endpoints de Reservas (Fluxo do Usuário)
+
+Rotas para o cliente realizar compras, ver seu histórico e cancelar pedidos.
+
+### 30. Finalizar Reserva (Checkout)
+
+Transforma os itens do Carrinho de Compras atual em uma Reserva. Verifica estoque, cria o pedido, baixa o estoque e limpa o carrinho.
+
+* **Método:** `POST`
+* **Endpoint:** `/reservas`
+* **URL Completa:** `http://127.0.0.1:8000/api/reservas`
+
+#### Autenticação (Header)
+Requer Token de Usuário (`Bearer Token`).
+
+#### Resposta de Sucesso (Status 201)
+```json
+{
+    "message": "Reserva realizada com sucesso!",
+    "reserva": {
+        "id_reserva": 15,
+        "id_usuario": 1,
+        "valor_total": "250.00",
+        "status": "Pendente",
+        "created_at": "...",
+        "itens": [
+            {
+                "id_item_reserva": 1,
+                "id_produto": 3,
+                "qtd_reservada": 2,
+                "produto": { "nome": "Capacete..." }
+            }
+        ]
+    }
+}
+```
+*Se o carrinho estiver vazio ou estoque insuficiente, retorna erro 400.*
+
+---
+
+### 31. Listar Minhas Reservas
+
+Retorna o histórico de compras do usuário logado.
+
+* **Método:** `GET`
+* **Endpoint:** `/reservas`
+* **URL Completa:** `http://127.0.0.1:8000/api/reservas`
+
+#### Autenticação (Header)
+Requer Token de Usuário (`Bearer Token`).
+
+#### Resposta de Sucesso (Status 200)
+Retorna uma lista paginada das reservas do usuário.
+
+---
+
+### 32. Cancelar Reserva
+
+Cancela um pedido e **devolve os itens para o estoque**.
+* **Regra:** O Cliente só pode cancelar se o status for `Pendente`. O Admin pode cancelar a qualquer momento.
+
+* **Método:** `DELETE`
+* **Endpoint:** `/reservas/{id}`
+* **URL Completa:** `http://127.0.0.1:8000/api/reservas/15`
+
+#### Autenticação (Header)
+Requer Token de Usuário ou Admin (`Bearer Token`).
+
+#### Resposta de Sucesso (Status 200)
+```json
+{
+    "message": "Reserva cancelada com sucesso e stock restaurado.",
+    "reserva": {
+        "id_reserva": 15,
+        "status": "Cancelado",
+        // ...
+    }
+}
+```
+
+---
+
+## Endpoints de Gestão de Reservas (Admin)
+
+Rotas exclusivas para o administrador gerenciar as vendas da loja.
+
+### 33. Listar Todas as Reservas (Painel Admin)
+
+Exibe todas as vendas da loja, independente do usuário.
+
+* **Método:** `GET`
+* **Endpoint:** `/admin/reservas`
+* **URL Completa:** `http://127.0.0.1:8000/api/admin/reservas`
+
+#### Autenticação (Header)
+Requer Token de **Admin** (`Bearer Token`).
+
+#### Resposta de Sucesso (Status 200)
+Retorna uma lista paginada contendo as reservas e os dados do usuário que comprou (`usuario`).
+
+---
+
+### 34. Ver Detalhes da Reserva (Admin)
+
+Exibe todos os dados de uma reserva específica.
+
+* **Método:** `GET`
+* **Endpoint:** `/admin/reservas/{id}`
+* **URL Completa:** `http://127.0.0.1:8000/api/admin/reservas/15`
+
+#### Autenticação (Header)
+Requer Token de **Admin** (`Bearer Token`).
+
+---
+
+### 35. Atualizar Status da Reserva
+
+Permite ao Admin avançar o fluxo do pedido (ex: Aprovar, Separar, Concluir).
+
+* **Método:** `PATCH`
+* **Endpoint:** `/admin/reservas/{id}/status`
+* **URL Completa:** `http://127.0.0.1:8000/api/admin/reservas/15/status`
+
+#### Autenticação (Header)
+Requer Token de **Admin** (`Bearer Token`).
+
+#### Corpo da Requisição (Body - JSON)
+Valores aceitos: `Pendente`, `Aprovado`, `Em Separação`, `Pronto para Retirada`, `Concluído`, `Cancelado`.
+```json
+{
+    "status": "Em Separação"
+}
+```
+
+#### Resposta de Sucesso (Status 200)
+Retorna a reserva com o status atualizado.
+
+### 30. Finalizar Reserva (Checkout)
+
+Cria uma nova reserva recebendo a lista de itens diretamente do Frontend. O backend valida o estoque e o preço real de cada produto antes de confirmar.
+
+* **Método:** `POST`
+* **Endpoint:** `/reservas`
+* **URL Completa:** `http://127.0.0.1:8000/api/reservas`
+
+#### Autenticação (Header)
+Requer Token de Usuário (`Bearer Token`).
+
+#### Corpo da Requisição (Body - JSON) **[OBRIGATÓRIO]**
+Deve conter um array `itens` com os IDs e quantidades desejadas.
+```json
+{
+    "itens": [
+        {
+            "id_produto": 1,
+            "quantidade": 2
+        },
+        {
+            "id_produto": 5,
+            "quantidade": 1
+        }
+    ]
+}
+```
+
+#### Resposta de Sucesso (Status 201)
+```json
+{
+    "message": "Reserva realizada com sucesso!",
+    "reserva": {
+        "id_reserva": 16,
+        "valor_total": "350.50",
+        "status": "Pendente",
+        "created_at": "...",
+        "itens": [
+            {
+                "id_item_reserva": 1,
+                "id_produto": 1,
+                "qtd_reservada": 2,
+                "produto": { "nome": "Capacete..." }
+            },
+            // ...
+        ]
+    }
+}
+```
+*Retorna erro 422 se os dados estiverem inválidos ou erro 500 com mensagem explicativa se não houver estoque suficiente.*

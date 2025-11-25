@@ -17,7 +17,11 @@ class Reserva extends Model
         'id_usuario',
         'valor_total',
         'status',
-        'data_reserva'
+        'data_reserva',
+        'telefone_contato',
+        'data_retirada',
+        'metodo_pagamento',
+        'observacao'
     ];
 
     // Relacionamento com Usuário

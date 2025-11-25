@@ -60,7 +60,6 @@ Route::middleware('auth:sanctum')->group(function () {
     // Rotas para associar Categorias Especiais a Produtos
     Route::post('/produtos/{uuid}/categorias-especiais', [ProdutoController::class, 'attachCategoriaEspecial']);
     Route::delete('/produtos/{uuid}/categorias-especiais/{id_categoria_especial}', [ProdutoController::class, 'detachCategoriaEspecial']);
-<<<<<<< HEAD
 
     // --- RESERVAS (Usuário) ---
     Route::get('/reservas', [ReservaController::class, 'index']); // Listar minhas reservas
@@ -72,6 +71,4 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/admin/reservas/{id}', [ReservaController::class, 'showAdmin']);
     Route::patch('/admin/reservas/{id}/status', [ReservaController::class, 'updateStatus']);
 
-=======
->>>>>>> d9079443102d0ce9072442ea52915595456c2392
 });

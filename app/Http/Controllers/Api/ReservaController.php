@@ -27,56 +27,80 @@ class ReservaController extends Controller
         return response()->json($reservas);
     }
 
-    /**
-     * Cria uma nova reserva a partir do carrinho de compras (Checkout).
+/**
+     * Cria uma nova reserva recebendo a lista de itens diretamente do Frontend.
      */
     public function store(Request $request)
     {
         $user = $request->user();
 
-        // 1. Busca o carrinho do usuário
-        $carrinho = CarrinhoCompra::where('id_user', $user->id)->with('produtos')->first();
+        // 1. Validação: O frontend DEVE enviar um array de itens
+        $validatedData = $request->validate([
+            'itens' => 'required|array|min:1',
+            'itens.*.id_produto' => 'required|integer|exists:produtos,id_produto',
+            'itens.*.quantidade' => 'required|integer|min:1',
+            'telefone_contato' => 'required|string',
+            'data_retirada' => 'required|date', 
+            'metodo_pagamento' => 'required|string',
+            'observacao' => 'nullable|string'
+        ]);
 
-        if (!$carrinho || $carrinho->produtos->isEmpty()) {
-            return response()->json(['message' => 'Seu carrinho está vazio.'], 400);
-        }
-
-        return DB::transaction(function () use ($user, $carrinho) {
+        return DB::transaction(function () use ($user, $validatedData) {
             
-            // 2. Calcular total e verificar estoque antes de criar
             $valorTotal = 0;
-            foreach ($carrinho->produtos as $produto) {
-                $valorTotal += $produto->preco * $produto->pivot->quantidade;
-                
-                if ($produto->qtd_estoque < $produto->pivot->quantidade) {
-                    throw new \Exception("O produto '{$produto->nome}' não tem estoque suficiente.");
+            $itensParaSalvar = [];
+
+            // 2. Preparação e Validação de Estoque
+            // Percorremos os itens enviados pelo frontend
+            foreach ($validatedData['itens'] as $itemEnviado) {
+                // Buscamos o produto no banco para pegar o PREÇO REAL e checar ESTOQUE REAL
+                // (Nunca confie no preço enviado pelo frontend)
+                $produto = \App\Models\Produto::find($itemEnviado['id_produto']);
+
+                // Verifica estoque
+                if ($produto->qtd_estoque < $itemEnviado['quantidade']) {
+                    throw new \Exception("O produto '{$produto->nome}' não tem estoque suficiente (Solicitado: {$itemEnviado['quantidade']}, Disponível: {$produto->qtd_estoque}).");
                 }
+
+                // Calcula o preço
+                $valorTotal += $produto->preco * $itemEnviado['quantidade'];
+
+                // Guarda os dados para salvar depois
+                $itensParaSalvar[] = [
+                    'produto' => $produto,
+                    'quantidade' => $itemEnviado['quantidade']
+                ];
             }
 
-            // 3. Criar a Reserva
+            // 3. Criar a Reserva (Cabeçalho)
             $reserva = Reserva::create([
                 'id_usuario' => $user->id,
                 'valor_total' => $valorTotal,
                 'status' => 'Pendente',
                 'data_reserva' => now(),
+                'telefone_contato' => $validatedData['telefone_contato'],
+                'data_retirada' => $validatedData['data_retirada'],
+                'metodo_pagamento' => $validatedData['metodo_pagamento'],
+                'observacao' => $validatedData['observacao'] ?? null,
             ]);
 
-            // 4. Mover itens do Carrinho para ReservaItem
-            foreach ($carrinho->produtos as $produto) {
-                $quantidade = $produto->pivot->quantidade;
+            // 4. Salvar os Itens e Baixar Estoque
+            foreach ($itensParaSalvar as $item) {
+                $produto = $item['produto'];
+                $qtd = $item['quantidade'];
 
-                ReservaItem::create([ // <<<--- Ajustado aqui
+                ReservaItem::create([
                     'id_reserva' => $reserva->id_reserva,
                     'id_produto' => $produto->id_produto,
-                    'qtd_reservada' => $quantidade,
+                    'qtd_reservada' => $qtd,
                 ]);
 
                 // Baixa o estoque
-                $produto->decrement('qtd_estoque', $quantidade);
+                $produto->decrement('qtd_estoque', $qtd);
             }
 
-            // 5. Esvaziar o carrinho
-            $carrinho->produtos()->detach();
+            // Nota: Não precisamos mais limpar a tabela CarrinhoCompra, 
+            // pois o frontend não está usando ela.
 
             return response()->json([
                 'message' => 'Reserva realizada com sucesso!',
