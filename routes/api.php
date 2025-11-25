@@ -18,6 +18,9 @@ Route::post('/auth/login', [AuthController::class, 'login']);
 Route::get('/produtos', [ProdutoController::class, 'index']);
 Route::get('/produtos/{uuid}', [ProdutoController::class, 'show']);
 
+Route::post('/produtos/{uuid}/imagens', [ProdutoController::class, 'addImage'])
+    ->whereUuid('uuid'); // TODO(Nathan): Colocar no middleware autenticado antes de commitar
+
 // Rotas que EXIGEM AUTENTICAÇÃO
 Route::middleware('auth:sanctum')->group(function () {
     // Rota para buscar o usuário logado
@@ -32,9 +35,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/produtos/{uuid}', [ProdutoController::class, 'destroy'])
         ->whereUuid('uuid');
     Route::post('/produtos/importar-estoque', [ProdutoController::class, 'import']);
-    Route::post('/produtos/{uuid}/imagens', [ProdutoController::class, 'addImage'])
-        ->whereUuid('uuid');
-    Route::post('/produtos/{uuid}/imagens', [ProdutoController::class, 'addImage']);
 
     // --- Carrinho de Compras ---
     Route::get('/carrinho', [CarrinhoController::class, 'show']);
