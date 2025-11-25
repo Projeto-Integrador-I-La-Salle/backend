@@ -11,7 +11,7 @@ class ReservaItem extends Model
 {
     use HasFactory;
 
-    protected $table = 'item_reserva';
+    protected $table = 'reserva_itens';
     protected $primaryKey = 'id_item_reserva';
     protected $fillable = [
         'id_reserva',

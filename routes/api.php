@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\CarrinhoController;
 use App\Http\Controllers\Api\ListaDesejosController;
 use App\Http\Controllers\Api\DescontoController;
 use App\Http\Controllers\Api\CategoriaEspecialController;
+use App\Http\Controllers\Api\ReservaController;
 
 // Rotas de Autenticação
 Route::post('/auth/register', [AuthController::class, 'register']);
@@ -59,5 +60,15 @@ Route::middleware('auth:sanctum')->group(function () {
     // Rotas para associar Categorias Especiais a Produtos
     Route::post('/produtos/{uuid}/categorias-especiais', [ProdutoController::class, 'attachCategoriaEspecial']);
     Route::delete('/produtos/{uuid}/categorias-especiais/{id_categoria_especial}', [ProdutoController::class, 'detachCategoriaEspecial']);
+
+    // --- RESERVAS (Usuário) ---
+    Route::get('/reservas', [ReservaController::class, 'index']); // Listar minhas reservas
+    Route::post('/reservas', [ReservaController::class, 'store']); // Finalizar pedido (Checkout)
+    Route::delete('/reservas/{id}', [ReservaController::class, 'cancel']); // Cancelar Reserva
+
+    // --- RESERVAS (Administração) ---
+    Route::get('/admin/reservas', [ReservaController::class, 'indexAdmin']);
+    Route::get('/admin/reservas/{id}', [ReservaController::class, 'showAdmin']);
+    Route::patch('/admin/reservas/{id}/status', [ReservaController::class, 'updateStatus']);
 
 });
